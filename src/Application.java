@@ -15,6 +15,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import java.awt.Insets;
+import javax.swing.SwingConstants;
+import java.awt.Dimension;
 
 
 public class Application {
@@ -24,10 +27,15 @@ public class Application {
 	public JTextField txtOpenedFile;
 	public JMenuItem mntmParseFile;
 	public List<DataPoint> dataPoints;
-	public JTextPane txtpnFileInfo; 
 	
 
 	public File file;
+	public JMenuItem mntmInterpolateValue;
+	public JLabel lblInterpolated;
+	public JTextField txtInterpolated;
+	private JLabel lblX;
+	private JLabel lblY;
+	private JLabel lblTime;
 	/**
 	 * Launch the application.
 	 */
@@ -70,24 +78,37 @@ public class Application {
 		txtOpenedFile = new JTextField();
 		txtOpenedFile.setEditable(false);
 		txtOpenedFile.setText("No file opened.");
-		txtOpenedFile.setBounds(12, 31, 289, 19);
+		txtOpenedFile.setBounds(12, 31, 318, 19);
 		frmDirectedStudyFinal.getContentPane().add(txtOpenedFile);
 		txtOpenedFile.setColumns(10);
 		
-		JLabel lblFileInfo = new JLabel("File Info:");
-		lblFileInfo.setBounds(12, 62, 70, 15);
-		frmDirectedStudyFinal.getContentPane().add(lblFileInfo);
+		lblInterpolated = new JLabel("Interpolated Value:");
+		lblInterpolated.setBounds(12, 118, 149, 15);
+		frmDirectedStudyFinal.getContentPane().add(lblInterpolated);
 		
-		txtpnFileInfo = new JTextPane();
-		txtpnFileInfo.setEditable(false);
-		txtpnFileInfo.setText("No File Info");
-		txtpnFileInfo.setBounds(12, 89, 289, 106);
-		frmDirectedStudyFinal.getContentPane().add(txtpnFileInfo);
+		txtInterpolated = new JTextField();
+		txtInterpolated.setBounds(165, 116, 165, 19);
+		frmDirectedStudyFinal.getContentPane().add(txtInterpolated);
+		txtInterpolated.setColumns(10);
+		
+		lblX = new JLabel("X:");
+		lblX.setBounds(12, 78, 98, 15);
+		frmDirectedStudyFinal.getContentPane().add(lblX);
+		
+		lblY = new JLabel("Y:");
+		lblY.setBounds(122, 78, 98, 15);
+		frmDirectedStudyFinal.getContentPane().add(lblY);
+		
+		lblTime = new JLabel("Time:");
+		lblTime.setBounds(232, 78, 98, 15);
+		frmDirectedStudyFinal.getContentPane().add(lblTime);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frmDirectedStudyFinal.setJMenuBar(menuBar);
 		
 		JMenuItem mntmImport = new JMenuItem("Import");
+		mntmImport.setMaximumSize(new Dimension(80, 32767));
+		mntmImport.setHorizontalAlignment(SwingConstants.LEFT);
 		mntmImport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				JFileChooser chooser = new JFileChooser();
@@ -96,31 +117,49 @@ public class Application {
 					Application.app.file = chooser.getSelectedFile(); 
 					txtOpenedFile.setText(chooser.getSelectedFile().getAbsolutePath());
 					mntmParseFile.setEnabled(true);
+					mntmInterpolateValue.setEnabled(true);
 				}
 			}
 		});
 		menuBar.add(mntmImport);
 		
 		mntmParseFile = new JMenuItem("Parse File");
+		mntmParseFile.setMaximumSize(new Dimension(100, 32767));
+		mntmParseFile.setHorizontalAlignment(SwingConstants.LEFT);
 		mntmParseFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 				Application app = Application.app;
 				app.parseFile();
+				JOptionPane.showMessageDialog(frmDirectedStudyFinal, "File successfully parsed.", "Success", JOptionPane.PLAIN_MESSAGE);
 				} catch (FileNotFoundException e) {
-					JOptionPane.showMessageDialog(frmDirectedStudyFinal, "File not found!");
+					JOptionPane.showMessageDialog(frmDirectedStudyFinal, "File not found!", "Error!", JOptionPane.ERROR_MESSAGE);
 					mntmParseFile.setEnabled(false);
+					mntmInterpolateValue.setEnabled(false);
 					txtOpenedFile.setText("No file opened.");					
 				}
-				StringBuilder sb = new StringBuilder();
-				sb.append("Number of measurements: ");
-				sb.append(app.dataPoints.size());
-				sb.append("\n");
-				Application.app.txtpnFileInfo.setText(sb.toString());
 			}
 		});
 		mntmParseFile.setEnabled(false);
 		menuBar.add(mntmParseFile);
+		
+		mntmInterpolateValue = new JMenuItem("Interpolate Value");
+		mntmInterpolateValue.setMaximumSize(new Dimension(150, 32767));
+		mntmInterpolateValue.setHorizontalAlignment(SwingConstants.LEFT);
+		mntmInterpolateValue.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				double x = Double.parseDouble(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "X?"));
+				double y = Double.parseDouble(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "Y?"));
+				int time = Integer.parseInt(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "Time?"));
+				lblX.setText("X: "+x);
+				lblY.setText("Y: "+y);
+				lblTime.setText("Time: "+time);
+				double value = DataPoint.interpolateValue(x, y, time, app.dataPoints);
+				txtInterpolated.setText(value+"");
+			}
+		});
+		mntmInterpolateValue.setEnabled(false);
+		menuBar.add(mntmInterpolateValue);
 	}
 	
 	public void parseFile() throws FileNotFoundException {
@@ -128,21 +167,24 @@ public class Application {
 		Scanner sc = null;
 		try {
 			sc = new Scanner(file);
+			int index = 0;
+			double[] dPArgs = new double[4];
+			while (sc.hasNextDouble()) {
+				double val = sc.nextDouble();
+				dPArgs[index%4] = val;
+				//Have we filled dataPointArgs?
+				if (index % 4 == 3) {
+					dataPoints.add(new DataPoint(dPArgs));
+					dPArgs = new double[4];
+				}
+				index++;
+			}
 		} catch (FileNotFoundException e) {
 			file = null;
 			throw e;
+		} finally {
+			sc.close();
 		}
-		int index = 0;
-		double[] dPArgs = new double[4];
-		while (sc.hasNextDouble()) {
-			double val = sc.nextDouble();
-			dPArgs[index%4] = val;
-			//Have we filled dataPointArgs?
-			if (index % 4 == 3) {
-				dataPoints.add(new DataPoint(dPArgs));
-				dPArgs = new double[4];
-			}
-			index++;
-		}
+		
 	}
 }
