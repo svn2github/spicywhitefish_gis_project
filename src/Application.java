@@ -36,6 +36,8 @@ public class Application {
 	private JLabel lblX;
 	private JLabel lblY;
 	private JLabel lblTime;
+	private JLabel lblN;
+	private JLabel lblP;
 	/**
 	 * Launch the application.
 	 */
@@ -83,11 +85,11 @@ public class Application {
 		txtOpenedFile.setColumns(10);
 		
 		lblInterpolated = new JLabel("Interpolated Value:");
-		lblInterpolated.setBounds(12, 118, 149, 15);
+		lblInterpolated.setBounds(12, 159, 149, 15);
 		frmDirectedStudyFinal.getContentPane().add(lblInterpolated);
 		
 		txtInterpolated = new JTextField();
-		txtInterpolated.setBounds(165, 116, 165, 19);
+		txtInterpolated.setBounds(157, 157, 165, 19);
 		frmDirectedStudyFinal.getContentPane().add(txtInterpolated);
 		txtInterpolated.setColumns(10);
 		
@@ -102,6 +104,14 @@ public class Application {
 		lblTime = new JLabel("Time:");
 		lblTime.setBounds(232, 78, 98, 15);
 		frmDirectedStudyFinal.getContentPane().add(lblTime);
+		
+		lblN = new JLabel("Number of Neighbors:");
+		lblN.setBounds(12, 105, 250, 15);
+		frmDirectedStudyFinal.getContentPane().add(lblN);
+		
+		lblP = new JLabel("P Value: ");
+		lblP.setBounds(12, 132, 98, 15);
+		frmDirectedStudyFinal.getContentPane().add(lblP);
 		
 		JMenuBar menuBar = new JMenuBar();
 		frmDirectedStudyFinal.setJMenuBar(menuBar);
@@ -144,17 +154,21 @@ public class Application {
 		menuBar.add(mntmParseFile);
 		
 		mntmInterpolateValue = new JMenuItem("Interpolate Value");
-		mntmInterpolateValue.setMaximumSize(new Dimension(150, 32767));
+		mntmInterpolateValue.setMaximumSize(new Dimension(210, 32767));
 		mntmInterpolateValue.setHorizontalAlignment(SwingConstants.LEFT);
 		mntmInterpolateValue.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				double x = Double.parseDouble(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "X?"));
 				double y = Double.parseDouble(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "Y?"));
 				int time = Integer.parseInt(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "Time?"));
+				int n = Integer.parseInt(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "Number of Neighbors?"));
+				int p = Integer.parseInt(JOptionPane.showInputDialog(Application.app.frmDirectedStudyFinal, "P Value?"));
 				lblX.setText("X: "+x);
 				lblY.setText("Y: "+y);
 				lblTime.setText("Time: "+time);
-				double value = DataPoint.interpolateValue(x, y, time, app.dataPoints);
+				lblN.setText("Number of Neighbors: "+n);
+				lblP.setText("P Value: "+p);
+				double value = DataPoint.interpolateValue(x, y, time, n, p, app.dataPoints);
 				txtInterpolated.setText(value+"");
 			}
 		});
