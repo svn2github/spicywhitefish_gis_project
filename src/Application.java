@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -5,7 +6,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -14,10 +14,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
-import java.awt.Insets;
 import javax.swing.SwingConstants;
-import java.awt.Dimension;
 
 
 public class Application {
@@ -46,6 +43,7 @@ public class Application {
 			public void run() {
 				try {
 					Application window = new Application();
+					window.initialize();
 					Application.app = window;
 					window.frmDirectedStudyFinal.setVisible(true);
 				} catch (Exception e) {
@@ -59,7 +57,6 @@ public class Application {
 	 * Create the application.
 	 */
 	public Application() {
-		initialize();
 		dataPoints = new ArrayList<DataPoint>();
 	}
 
@@ -175,30 +172,7 @@ public class Application {
 		mntmInterpolateValue.setEnabled(false);
 		menuBar.add(mntmInterpolateValue);
 	}
-	
-	public void parseFile() throws FileNotFoundException {
-		dataPoints = new ArrayList<DataPoint>();
-		Scanner sc = null;
-		try {
-			sc = new Scanner(file);
-			int index = 0;
-			double[] dPArgs = new double[4];
-			while (sc.hasNextDouble()) {
-				double val = sc.nextDouble();
-				dPArgs[index%4] = val;
-				//Have we filled dataPointArgs?
-				if (index % 4 == 3) {
-					dataPoints.add(new DataPoint(dPArgs));
-					dPArgs = new double[4];
-				}
-				index++;
-			}
-		} catch (FileNotFoundException e) {
-			file = null;
-			throw e;
-		} finally {
-			sc.close();
-		}
-		
+	private void parseFile() throws FileNotFoundException {
+		this.dataPoints = DataPoint.parseFile(this.file);
 	}
 }

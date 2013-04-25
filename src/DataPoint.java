@@ -1,5 +1,9 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class DataPoint {
@@ -25,7 +29,7 @@ public class DataPoint {
 		return interpolateValue(x, y, t, 3, 1, points);
 	}
 	
-	public static double interpolateValue(double x, double y, int t, int N, int p, List<DataPoint> points) {
+	public static double interpolateValue(double x, double y, int t, int N, double p, List<DataPoint> points) {
 		DataPoint output = new DataPoint(x, y, t, 0);
 		List<DataPoint> neighbors = output.findNeighbors(points, N);
 		double sum = 0;
@@ -35,29 +39,33 @@ public class DataPoint {
 		return sum;
 	}
 	
-	double getLambda(List<DataPoint> points, DataPoint selectedPoint, int p) {
+	double getLambda(List<DataPoint> neighbors, DataPoint selectedPoint, double p) {
 		double di = this.getDistanceTo(selectedPoint);
 		double numerator = Math.pow(1/di, p);
 		double denominator = 0;
-		for(DataPoint pointElement : points) {
+		for(DataPoint pointElement : neighbors) {
 			double dk = this.getDistanceTo(pointElement);
 			denominator += Math.pow(1/dk, p);
 		}
+		assert denominator != 0;
 		return numerator / denominator;
 	}
-	private List<DataPoint> findNeighbors(List<DataPoint> pointList, int numNeighbors) {
+	public List<DataPoint> findNeighbors(List<DataPoint> pointList, int numNeighbors) {
 		DataPoint[] neighbors = new DataPoint[numNeighbors];
 		double[] distances = new double[numNeighbors];
-		for(int i=0; i<distances.length; i++) {
-			distances[i] = Double.MAX_VALUE;
-		}
-		for (DataPoint pointElement : pointList) {
-			double distance = this.getDistanceTo(pointElement);
-			for(int i=0; i<distances.length; i++) {
-				if (distance < distances[i]) {
+		for (DataPoint element : pointList) {
+			double distance = this.getDistanceTo(element);
+			for (int i=0; i<neighbors.length; i++) {
+				if (neighbors[i] == null) {
+					neighbors[i] = element;
 					distances[i] = distance;
-					neighbors[i] = pointElement;
+					break;
 				}
+				if (distance < distances[i]) {
+					neighbors[i] = element;
+					distances[i] = distance;
+					break;
+				}	
 			}
 		}
 		return Arrays.asList(neighbors);
@@ -67,8 +75,41 @@ public class DataPoint {
 		double dy = y - other.y;
 		double dt = time - other.time;
 		return Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2)+Math.pow(dt,2));
+	}	
+
+	public static List<DataPoint> parseFile(File f) throws FileNotFoundException {
+		List<DataPoint> output = new ArrayList<DataPoint>();
+		Scanner sc = null;
+		try {
+			sc = new Scanner(f);
+			int index = 0;
+			double[] dPArgs = new double[4];
+			while (sc.hasNextDouble()) {
+				double val = sc.nextDouble();
+				dPArgs[index%4] = val;
+				//Have we filled dataPointArgs?
+				if (index % 4 == 3) {
+					output.add(new DataPoint(dPArgs));
+					dPArgs = new double[4];
+				}
+				index++;
+			}
+		} catch (FileNotFoundException e) {
+			f = null;
+			throw e;
+		} finally {
+			sc.close();
+		}
+		return output;
 	}
 	
+	public boolean equals(Object o) {
+		if (o instanceof DataPoint) {
+			DataPoint dp = (DataPoint)(o);
+			return this.x == dp.x && y == dp.y && measurement == dp.measurement && time == dp.time; 
+		} else
+			return false;
+	}
 	
 	@Override
 	public String toString() {
