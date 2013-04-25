@@ -4,41 +4,24 @@ public class DataPoint {
 	double y;
 	int time;
 	double measurement;
-
-	static double min_x;
-	static double max_x;
-	static double min_y;
-	static double max_y;
-	static boolean hasData;
 	
-	public DataPoint(double x, double y, int time, double measurement) {
-		this.x=x;
-		this.y=y;
-		this.time=time;
-		this.measurement=measurement;
-		if (hasData) {
-			if (x<min_x) {
-				min_x = x;
-			} else {
-				if (x>max_x) {
-					max_x = x;
-				}
-			}
-			if (x<min_y) {
-				min_y = y;
-			} else {
-				if (x>max_y) {
-					max_y = y;
-				}
-			}
-		} else {
-			min_x = x;
-			max_x = x;
-			min_y = y;
-			max_y = y;
-		}
+	public DataPoint(double[] args) {
+		this.x=args[0];
+		this.y=args[1];
+		this.time=(int)(args[2]);
+		this.measurement=args[3];
 	}
-	public static void resetData() {
-		hasData=false;
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(x);
+		sb.append(" ");
+		sb.append(y);
+		sb.append(" ");
+		sb.append(time);
+		sb.append(" ");
+		sb.append(measurement);
+		return sb.toString();
 	}
 }
