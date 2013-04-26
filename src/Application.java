@@ -183,8 +183,9 @@ public class Application {
 				int returnVal = chooser.showOpenDialog(Application.app.frmDirectedStudyFinal);
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
 					Application.app.file = chooser.getSelectedFile(); 
-					try {
-						DataPoint.generateTestResults(chooser.getSelectedFile());
+					try {JOptionPane.showMessageDialog(frmDirectedStudyFinal, "Warning: LOOCV may take a few minutes to complete.", "Warning", JOptionPane.INFORMATION_MESSAGE);
+						DataPoint.initPoints(Application.app.dataPoints);
+						DataPoint.generateLOOCV(chooser.getSelectedFile());
 					} catch (Exception e) {
 						JOptionPane.showMessageDialog(Application.app.frmDirectedStudyFinal, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 					}
@@ -195,135 +196,98 @@ public class Application {
 		});
 		mntmLoocv.setEnabled(false);
 		menuBar.add(mntmLoocv);
+		
+		JMenuItem mntmErrorSummary = new JMenuItem("Error Summary");
+		mntmErrorSummary.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				File input=null, output=null;
+				JFileChooser chooser = new JFileChooser();
+				chooser.setDialogTitle("Select Input LOOCV");
+				int returnVal = chooser.showOpenDialog(Application.app.frmDirectedStudyFinal);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					input = chooser.getSelectedFile();
+					chooser = new JFileChooser();
+					chooser.setDialogTitle("Select Output File");
+					returnVal = chooser.showOpenDialog(Application.app.frmDirectedStudyFinal);
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						output = chooser.getSelectedFile();
+					}
+					Application.writeErrorFile((Application.parseLoocvFile(input)), output);
+					JOptionPane.showMessageDialog(Application.app.frmDirectedStudyFinal, "Successfully generated error measures file");
+				}
+			}
+		});
+		mntmErrorSummary.setMaximumSize(new Dimension(250, 32767));
+		mntmErrorSummary.setHorizontalTextPosition(SwingConstants.LEFT);
+		mntmErrorSummary.setHorizontalAlignment(SwingConstants.LEFT);
+		menuBar.add(mntmErrorSummary);
 	}
 	private void parseFile() throws FileNotFoundException {
 		this.dataPoints = DataPoint.parseFile(this.file);
-		DataPoint.init(this.dataPoints);
 	}
 	//create file with error reports called error_statistics_idw.txt inside of data.
-	public static void writeErrorFile(LinkedList<Double>[] lists){
-		String content = "";
-		content+="MAE for IDW with 3 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[1]))+"\n";
-		content+="MAE for IDW with 3 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[2]))+"\n";
-		content+="MAE for IDW with 3 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[3]))+"\n";
-		content+="MAE for IDW with 4 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[4]))+"\n";
-		content+="MAE for IDW with 4 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[5]))+"\n";
-		content+="MAE for IDW with 4 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[6]))+"\n";
-		content+="MAE for IDW with 5 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[7]))+"\n";
-		content+="MAE for IDW with 5 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[8]))+"\n";
-		content+="MAE for IDW with 5 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MAE(lists[0],lists[9]))+"\n\n";
-		
-		content+="MSE for IDW with 3 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[1]))+"\n";
-		content+="MSE for IDW with 3 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[2]))+"\n";
-		content+="MSE for IDW with 3 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[3]))+"\n";
-		content+="MSE for IDW with 4 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[4]))+"\n";
-		content+="MSE for IDW with 4 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[5]))+"\n";
-		content+="MSE for IDW with 4 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[6]))+"\n";
-		content+="MSE for IDW with 5 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[7]))+"\n";
-		content+="MSE for IDW with 5 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[8]))+"\n";
-		content+="MSE for IDW with 5 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MSE(lists[0],lists[9]))+"\n\n";
-		
-		content+="RMSE for IDW with 3 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[1]))+"\n";
-		content+="RMSE for IDW with 3 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[2]))+"\n";
-		content+="RMSE for IDW with 3 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[3]))+"\n";
-		content+="RMSE for IDW with 4 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[4]))+"\n";
-		content+="RMSE for IDW with 4 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[5]))+"\n";
-		content+="RMSE for IDW with 4 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[6]))+"\n";
-		content+="RMSE for IDW with 5 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[7]))+"\n";
-		content+="RMSE for IDW with 5 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[8]))+"\n";
-		content+="RMSE for IDW with 5 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.RMSE(lists[0],lists[9]))+"\n\n";
-		
-		content+="MARE for IDW with 3 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[1]))+"\n";
-		content+="MARE for IDW with 3 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[2]))+"\n";
-		content+="MARE for IDW with 3 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[3]))+"\n";
-		content+="MARE for IDW with 4 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[4]))+"\n";
-		content+="MARE for IDW with 4 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[5]))+"\n";
-		content+="MARE for IDW with 4 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[6]))+"\n";
-		content+="MARE for IDW with 5 neighbors and exponent 1: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[7]))+"\n";
-		content+="MARE for IDW with 5 neighbors and exponent 2: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[8]))+"\n";
-		content+="MARE for IDW with 5 neighbors and exponent 3: ";
-		content+=Double.toString(DataPoint.MARE(lists[0],lists[9]))+"\n\n";
-		
+	public static void writeErrorFile(LinkedList<Double>[] lists, File output) {
+		BufferedWriter bw = null;
 		try{
-			File errFile= new File("data/error_statistics_idw.txt");
-			if (!errFile.exists()) {
-				errFile.createNewFile();
+			FileWriter fw = new FileWriter(output.getAbsoluteFile());
+			bw = new BufferedWriter(fw);
+			for(int errorMetric=0; errorMetric<4; errorMetric++) {
+				StringBuilder sb = new StringBuilder();
+				for(int idwMethod=1; idwMethod<10; idwMethod++) {
+					switch(errorMetric) {
+					case 0:
+						sb.append("MAE");
+						break;
+					case 1:
+						sb.append("MSE");
+						break;
+					case 2:
+						sb.append("RMSE");
+						break;
+					case 3:
+						sb.append("MARE");
+					default:
+						break;
+					}
+					sb.append(" for IDW with ");
+					sb.append(errorMetric/3+3);
+					sb.append(" neighbors and exponent ");
+					sb.append(errorMetric%3+1);
+					sb.append(": ");
+					sb.append(DataPoint.MARE(lists[0],lists[errorMetric]));
+					sb.append("\n");
+				}
+				sb.append("\n");
+				bw.append(sb.toString());
+				System.out.println(sb.toString());
 			}
-			FileWriter fw = new FileWriter(errFile.getAbsoluteFile());
-			BufferedWriter bw = new BufferedWriter(fw);
-			bw.write(content);
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	public static LinkedList<Double>[] extractIntData(File file){
-		LinkedList<Double> original = new LinkedList<Double>();
-		LinkedList<Double> p3n1 = new LinkedList<Double>();
-		LinkedList<Double> p3n2 = new LinkedList<Double>();
-		LinkedList<Double> p3n3 = new LinkedList<Double>();
-		LinkedList<Double> p4n1 = new LinkedList<Double>();
-		LinkedList<Double> p4n2 = new LinkedList<Double>();
-		LinkedList<Double> p4n3 = new LinkedList<Double>();
-		LinkedList<Double> p5n1 = new LinkedList<Double>();
-		LinkedList<Double> p5n2 = new LinkedList<Double>();
-		LinkedList<Double> p5n3 = new LinkedList<Double>();
-		
-		LinkedList[] lists = {original,p3n1,p3n2,p3n3,p4n1,p4n2,p4n3,p5n1,p5n2,p5n3};
+	
+	public static LinkedList<Double>[] parseLoocvFile(File file){
+		System.out.println("Reading file!");
+		LinkedList[] lists = new LinkedList[10];
+		for (int i=0; i<10; i++) {
+			lists[i] = new LinkedList<Double>();
+		}
 		Scanner sc = null;
 		try {
 			sc = new Scanner(file);
 			int index = 0;
 			while (sc.hasNextDouble()){
-				lists[index].add(sc.nextDouble());
-				if (index+1%10==0){
-					index=0;
-					continue;
-				}
+				lists[index%10].add(sc.nextDouble());
 				index++;
 			}
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} finally {
+			sc.close();
 		}
+		System.out.println("Read whole file!");
 		return lists;
 	}
 	private void hasFile(boolean hasFile) {

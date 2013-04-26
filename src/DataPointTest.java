@@ -1,9 +1,6 @@
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -70,44 +67,12 @@ public class DataPointTest {
 //		fail("Not yet implemented");
 	}
 	
-	
-	
-	@Test
-	public final void testFindNeighbors() {
-		DataPoint testPoint = new DataPoint(-87.881410, 30.498000, 62, 0);
-		int numNeighbors = 2;
-		List<DataPoint> neighbors = testPoint.findNeighbors(pointList, numNeighbors);
-		Collections.shuffle(neighbors);
-		Assert.assertEquals(numNeighbors, neighbors.size());
-		double[] distances = new double[numNeighbors];
-		for(int i=0; i<distances.length; i++) {
-			distances[i] = testPoint.getDistanceTo(neighbors.get(i));
-		}
-		int index=0;
-		for(DataPoint element : pointList) {
-			index++;
-			double testDistance = testPoint.getDistanceTo(element);
-			boolean isSmaller=false;
-			for(double closestDistance : distances) {
-				isSmaller = false;
-				if (testDistance < closestDistance) {
-					isSmaller = true;
-					System.out.println(testDistance);
-					System.out.println(closestDistance);
-					System.out.println(index);
-					System.out.println(element);
-					break;
-				}
-			}
-			Assert.assertFalse(isSmaller);
-		}
-	}
 
 	@Test
 	public final void testGetDistanceTo() {
 		DataPoint testPoint = new DataPoint(-87.881410, 30.498000, 62, 0);
 		DataPoint targetPoint = new DataPoint(-88.087526, 30.769941, 61, 7.0);
-		double actual = testPoint.getDistanceTo(targetPoint);
+		double actual = testPoint.getDistanceSquaredTo(targetPoint);
 		double expected = 1.05662;
 		double delta = .001;
 		Assert.assertEquals(expected, actual, delta);

@@ -2,9 +2,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -12,36 +10,47 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.JOptionPane;
 
 public class DataPoint {
-	private static int count =0;
+//	private static int count =0;
 	private static final int MAX_NEIGHBORS = 5;
 	double x;
 	double y;
 	int time;
 	double measurement;
 	private DataPoint[] neighbors;
+	private boolean isInitialized;
 
 	public DataPoint(double[] args) {
 		this.x=args[0];
 		this.y=args[1];
 		this.time=(int)(args[2]);
 		this.measurement=args[3];
-		neighbors = new DataPoint[MAX_NEIGHBORS];
+		this.neighbors = new DataPoint[MAX_NEIGHBORS];
+		isInitialized = false;
 	}
 	public DataPoint(double x, double y, int time, double measurement) {
 		this.x=x;
 		this.y=y;
 		this.time=time;
 		this.measurement=measurement;
-		neighbors = new DataPoint[MAX_NEIGHBORS];
+		this.neighbors = new DataPoint[MAX_NEIGHBORS];
+		isInitialized = false;
+	}
+	public void init(List<DataPoint> pointList) {
+		if (!isInitialized) {
+			this.initNeighbors(pointList);
+		}
 	}
 
 	private void initNeighbors(List<DataPoint> pointList) {
 		neighbors = new DataPoint[MAX_NEIGHBORS];
 		double[] distances = new double[MAX_NEIGHBORS];
 		for (DataPoint element : pointList) {
-			double distance = this.getDistanceTo(element);
+			double distance = this.getDistanceSquaredTo(element);
 			if (element == this || distance == 0)
 				continue;
 			boolean hasNull = hasNull(neighbors);
@@ -59,7 +68,7 @@ public class DataPoint {
 			}
 		}
 		this.sortNeighbors();
-		System.out.println("Initialized: "+count++);
+//		System.out.println("Initialized: "+DataPoint.count++);
 	}
 	
 	private static boolean hasNull(DataPoint[] points) {
@@ -74,9 +83,9 @@ public class DataPoint {
 	
 	private void sortNeighbors() {
 		for(int i=0; i<neighbors.length; i++) {
-			double iDist = this.getDistanceTo(neighbors[i]);
+			double iDist = this.getDistanceSquaredTo(neighbors[i]);
 			for(int j=i+1; j<neighbors.length; j++) {
-				double jDist = this.getDistanceTo(neighbors[j]);
+				double jDist = this.getDistanceSquaredTo(neighbors[j]);
 				if (jDist < iDist) {
 					DataPoint swap = neighbors[i];
 					neighbors[i]=neighbors[j];
@@ -86,18 +95,19 @@ public class DataPoint {
 		}
 	}
 	
-	public static void init(List<DataPoint> points) {
-		for (DataPoint data : points) {
-			data.initNeighbors(points);
+	public static void initPoints(List<DataPoint> points) {
+		ExecutorService executor = Executors.newCachedThreadPool();
+		for (DataPoint element : points) {
+			executor.submit(new InitNeighborRunnable(element, points));
 		}
-	}
-	
-	public List<DataPoint> getNeighbors(int num) {
-		List<DataPoint> output = new ArrayList<DataPoint>(num);
-		for(int i=0; i<num; i++) {
-			output.add(neighbors[i]);
+		executor.shutdown();
+		while(!executor.isTerminated()) {
+			try {
+				executor.awaitTermination(1, TimeUnit.MINUTES);
+			} catch (InterruptedException e) {
+				JOptionPane.showMessageDialog(Application.app.frmDirectedStudyFinal, "Initialization Interrupted!", "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
-		return output;
 	}
 	
 	public static double interpolateValue(double x, double y, int t,  List<DataPoint> points) {
@@ -106,22 +116,18 @@ public class DataPoint {
 
 	public static double interpolateValue(double x, double y, int t, int N, double p, List<DataPoint> points) {
 		DataPoint output = new DataPoint(x, y, t, 0);
-		output.initNeighbors(points);
-		double sum = 0;
-		for(DataPoint neighborPoint : output.getNeighbors(N)) {
-			sum+= output.getLambda(points, neighborPoint, p) * neighborPoint.measurement;
+		output.init(points);
+		for(DataPoint neighbor : output.neighbors) {
+			neighbor.init(points);
 		}
-		return sum;
-	}
-	public double loocv(int N, double p, List<DataPoint> points) {
 		double sum = 0;
-		for(DataPoint neighborPoint : this.getNeighbors(N)) {
-			sum+= this.getLambda(points, neighborPoint, p) * neighborPoint.measurement;
+		for(int i=0; i<N; i++) {
+			sum+= output.getLambda(output.neighbors, output.neighbors[i], p) * output.neighbors[i].measurement;
 		}
 		return sum;
 	}
 	
-	double getLambda(List<DataPoint> neighbors, DataPoint selectedPoint, double p) {
+	double getLambda(DataPoint[] neighbors, DataPoint selectedPoint, double p) {
 		double di = this.getDistanceTo(selectedPoint);
 		double numerator = Math.pow(1/di, p);
 		double denominator = 0;
@@ -132,14 +138,22 @@ public class DataPoint {
 		assert denominator != 0;
 		return numerator / denominator;
 	}
-	
-	public double getDistanceTo(DataPoint other) {
-		double dx = x-other.x;
-		double dy = y - other.y;
-		double dt = time - other.time;
-		return Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2)+Math.pow(dt,2));
-	}	
 
+	public double loocv(int N, double p) {
+		double sum = 0;
+		for(int i=0; i<N; i++) {
+			sum+= this.getLambda(this.neighbors, this.neighbors[i], p) * neighbors[i].measurement;
+		}
+		return sum;
+	}
+	public double getDistanceTo(DataPoint other) {
+		return Math.sqrt((x-other.x)*(x-other.x)+(y-other.y)*(y-other.y)+(time-other.time)*(time-other.time));
+	}
+	//Performance optimization for finding closest neighbors
+	public double getDistanceSquaredTo(DataPoint other) {
+		return (x-other.x)*(x-other.x)+(y-other.y)*(y-other.y)+(time-other.time)*(time-other.time);
+	}
+	
 	public static List<DataPoint> parseFile(File f) throws FileNotFoundException {
 		List<DataPoint> output = new ArrayList<DataPoint>();
 		Scanner sc = null;
@@ -166,20 +180,21 @@ public class DataPoint {
 		return output;
 	}
 	
-	public static void generateTestResults(File outFile) throws Exception {
+	public static void generateLOOCV(File outFile) throws Exception {
 		ExecutorService executor = Executors.newCachedThreadPool();
 		List<List<Future<Double>>> futures = new ArrayList<List<Future<Double>>>();
 		for(DataPoint element : Application.app.dataPoints) {
 			List<Future<Double>> rowFutureList = new ArrayList<Future<Double>>(10);
 			for(int N=3; N<=5; N++) {
 				for(int p=1; p<=3; p++) {
-					Callable<Double> worker = new LoocvCallable(element, Application.app.dataPoints, N, p);
+					Callable<Double> worker = new LoocvCallable(element, N, p);
 					Future<Double> submit = executor.submit(worker);
 					rowFutureList.add(submit);
 				}
 			}
 			futures.add(rowFutureList);
 		}
+		executor.shutdown();
 		FileWriter fw = new FileWriter(outFile, false);
 		BufferedWriter bw = new BufferedWriter(fw);
 		for(int i=0; i< futures.size(); i++) {
@@ -193,46 +208,43 @@ public class DataPoint {
 			}
 			sb.append("\n");
 			bw.append(sb.toString());
-			System.out.println(sb.toString());
 		}
 		bw.close();
 	}
 	
-	
-	//Compute the error measurements 
-	public static double MAE(LinkedList<Double> original, LinkedList<Double> interpolated){
+	//Compute the error doubleValue()s 
+	public static double MAE(List<Double> original, List<Double> interpolated){
 		assert original.size() == interpolated.size();
 		double sum=0;
 		for (int i=0;i<original.size();i++){
-			sum += Math.abs(interpolated.get(i)-original.get(i));
+			sum += Math.abs(interpolated.get(i).doubleValue()-original.get(i).doubleValue());
 		}
 		return sum/original.size();
 	}
-	public static double MSE(LinkedList<Double> original, LinkedList<Double> interpolated){
+	public static double MSE(List<Double> original, List<Double> interpolated){
 		assert original.size() == interpolated.size();
-		double sum=0;
-		for (int i=0;i<original.size();i++){
-			sum += Math.abs(interpolated.get(i)-original.get(i));
-		}
-		return sum/original.size();
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += Math.pow(interpolated.get(i).doubleValue()-original.get(i).doubleValue(),2);
+			}
+			return sum/original.size();
 	}
-	public static double RMSE(LinkedList<Double> original, LinkedList<Double> interpolated){
+	public static double RMSE(List<Double> original, List<Double> interpolated){
 		assert original.size() == interpolated.size();
 		double sum=0;
 		for (int i=0;i<original.size();i++){
-			sum += Math.abs(interpolated.get(i)-original.get(i));
+			sum += Math.pow(interpolated.get(i).doubleValue()-original.get(i).doubleValue(),2);
 		}
 		return Math.sqrt(sum/original.size());
 	}
-	public static double MARE(LinkedList<Double> original, LinkedList<Double> interpolated){
+	public static double MARE(List<Double> original, List<Double> interpolated){
 		assert original.size() == interpolated.size();
 		double sum=0;
 		for (int i=0;i<original.size();i++){
-			sum += (Math.abs(interpolated.get(i)-original.get(i)))/original.get(i);
+			sum += (Math.abs(interpolated.get(i).doubleValue()-original.get(i).doubleValue()))/original.get(i).doubleValue();
 		}
 		return sum/original.size();
 	}
-	
 	public boolean equals(Object o) {
 		if (o instanceof DataPoint) {
 			DataPoint dp = (DataPoint)(o);
@@ -255,21 +267,31 @@ public class DataPoint {
 	}
 }
 
+class InitNeighborRunnable implements Runnable {
+	private DataPoint dataPoint;
+	private List<DataPoint> pointList;
+	public InitNeighborRunnable(DataPoint dataPoint, List<DataPoint> pointList) {
+		this.dataPoint = dataPoint;
+		this.pointList = pointList;
+	}
+	@Override
+	public void run() {
+		dataPoint.init(pointList);
+	}
+}
+
 class LoocvCallable implements Callable<Double> {
 	public DataPoint target;
-	private List<DataPoint> points;
 	private int N;
 	private double p;
-	public LoocvCallable(DataPoint target, List<DataPoint> points, int N, double p) {
+	public LoocvCallable(DataPoint target, int N, double p) {
 		this.target = target;
-		this.points = points;
 		this.N = N;
 		this.p = p;
-		
 	}
 
 	@Override
 	public Double call() throws Exception {
-		return new Double(target.loocv(N, p, points));
+		return new Double(target.loocv(N, p));
 	}
 }
