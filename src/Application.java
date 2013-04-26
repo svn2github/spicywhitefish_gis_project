@@ -22,12 +22,14 @@ public class Application {
 	public JFrame frmDirectedStudyFinal;
 	public static Application app;
 	public JTextField txtOpenedFile;
-	public JMenuItem mntmParseFile;
 	public List<DataPoint> dataPoints;
 	
 
 	public File file;
 	public JMenuItem mntmInterpolateValue;
+	public JMenuItem mntmImport; 
+	public JMenuItem mntmParseFile;
+	public JMenuItem mntmLoocv;
 	public JLabel lblInterpolated;
 	public JTextField txtInterpolated;
 	private JLabel lblX;
@@ -113,7 +115,7 @@ public class Application {
 		JMenuBar menuBar = new JMenuBar();
 		frmDirectedStudyFinal.setJMenuBar(menuBar);
 		
-		JMenuItem mntmImport = new JMenuItem("Import");
+		mntmImport = new JMenuItem("Import");
 		mntmImport.setMaximumSize(new Dimension(80, 32767));
 		mntmImport.setHorizontalAlignment(SwingConstants.LEFT);
 		mntmImport.addActionListener(new ActionListener() {
@@ -123,8 +125,7 @@ public class Application {
 				if(returnVal == JFileChooser.APPROVE_OPTION) {
 					Application.app.file = chooser.getSelectedFile(); 
 					txtOpenedFile.setText(chooser.getSelectedFile().getAbsolutePath());
-					mntmParseFile.setEnabled(true);
-					mntmInterpolateValue.setEnabled(true);
+					Application.app.hasFile(true);
 				}
 			}
 		});
@@ -141,8 +142,7 @@ public class Application {
 				JOptionPane.showMessageDialog(frmDirectedStudyFinal, "File successfully parsed.", "Success", JOptionPane.PLAIN_MESSAGE);
 				} catch (FileNotFoundException e) {
 					JOptionPane.showMessageDialog(frmDirectedStudyFinal, "File not found!", "Error!", JOptionPane.ERROR_MESSAGE);
-					mntmParseFile.setEnabled(false);
-					mntmInterpolateValue.setEnabled(false);
+					Application.app.hasFile(false);
 					txtOpenedFile.setText("No file opened.");					
 				}
 			}
@@ -171,8 +171,34 @@ public class Application {
 		});
 		mntmInterpolateValue.setEnabled(false);
 		menuBar.add(mntmInterpolateValue);
+		
+		mntmLoocv = new JMenuItem("LOOCV");
+		mntmLoocv.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFileChooser chooser = new JFileChooser();
+				int returnVal = chooser.showOpenDialog(Application.app.frmDirectedStudyFinal);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					Application.app.file = chooser.getSelectedFile(); 
+					try {
+						DataPoint.generateTestResults(chooser.getSelectedFile());
+					} catch (Exception e) {
+						JOptionPane.showMessageDialog(Application.app.frmDirectedStudyFinal, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+					}
+					JOptionPane.showMessageDialog(Application.app.frmDirectedStudyFinal, "Results successfully generated!");
+				}
+				
+			}
+		});
+		mntmLoocv.setEnabled(false);
+		menuBar.add(mntmLoocv);
 	}
 	private void parseFile() throws FileNotFoundException {
 		this.dataPoints = DataPoint.parseFile(this.file);
+		DataPoint.init(this.dataPoints);
+	}
+	private void hasFile(boolean hasFile) {
+		mntmParseFile.setEnabled(hasFile);
+		mntmInterpolateValue.setEnabled(hasFile);
+		mntmLoocv.setEnabled(hasFile);
 	}
 }
