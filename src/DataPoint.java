@@ -102,6 +102,55 @@ public class DataPoint {
 		}
 		return output;
 	}
+	//Compute the error measurements 
+	public static double MAE(List<DataPoint> original, List<DataPoint> interpolated){
+		assert original.size() == interpolated.size();
+		double sum=0;
+		for (int i=0;i<original.size();i++){
+			sum += Math.abs(interpolated.get(i).measurement-original.get(i).measurement);
+		}
+		return sum/original.size();
+	}
+	public static double MSE(List<DataPoint> original, List<DataPoint> interpolated){
+		assert original.size() == interpolated.size();
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2);
+			}
+			return sum/original.size();
+	}
+	public static double RMSE(List<DataPoint> original, List<DataPoint> interpolated){
+		assert original.size() == interpolated.size();
+		double sum=0;
+		for (int i=0;i<original.size();i++){
+			sum += Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2);
+		}
+		return Math.sqrt(sum/original.size());
+	}
+	public static double MARE(List<DataPoint> original, List<DataPoint> interpolated){
+		assert original.size() == interpolated.size();
+		double sum=0;
+		for (int i=0;i<original.size();i++){
+			sum += (Math.abs(interpolated.get(i).measurement-original.get(i).measurement))/original.get(i).measurement;
+		}
+		return sum/original.size();
+	}
+	public static double MSRE(List<DataPoint> original, List<DataPoint> interpolated){
+		assert original.size() == interpolated.size();
+		double sum=0;
+		for (int i=0;i<original.size();i++){
+			sum += (Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2))/original.get(i).measurement;
+		}
+		return sum/original.size();
+	}
+	public static double RMSRE(List<DataPoint> original, List<DataPoint> interpolated){
+		assert original.size() == interpolated.size();
+		double sum=0;
+		for (int i=0;i<original.size();i++){
+			sum += (Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2))/original.get(i).measurement;
+		}
+		return Math.sqrt(sum/original.size());
+	}
 	
 	public boolean equals(Object o) {
 		if (o instanceof DataPoint) {
