@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -199,53 +200,37 @@ public class DataPoint {
 	
 	
 	//Compute the error measurements 
-	public static double MAE(List<DataPoint> original, List<DataPoint> interpolated){
+	public static double MAE(LinkedList<Double> original, LinkedList<Double> interpolated){
 		assert original.size() == interpolated.size();
 		double sum=0;
 		for (int i=0;i<original.size();i++){
-			sum += Math.abs(interpolated.get(i).measurement-original.get(i).measurement);
+			sum += Math.abs(interpolated.get(i)-original.get(i));
 		}
 		return sum/original.size();
 	}
-	public static double MSE(List<DataPoint> original, List<DataPoint> interpolated){
-		assert original.size() == interpolated.size();
-			double sum=0;
-			for (int i=0;i<original.size();i++){
-				sum += Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2);
-			}
-			return sum/original.size();
-	}
-	public static double RMSE(List<DataPoint> original, List<DataPoint> interpolated){
+	public static double MSE(LinkedList<Double> original, LinkedList<Double> interpolated){
 		assert original.size() == interpolated.size();
 		double sum=0;
 		for (int i=0;i<original.size();i++){
-			sum += Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2);
+			sum += Math.abs(interpolated.get(i)-original.get(i));
+		}
+		return sum/original.size();
+	}
+	public static double RMSE(LinkedList<Double> original, LinkedList<Double> interpolated){
+		assert original.size() == interpolated.size();
+		double sum=0;
+		for (int i=0;i<original.size();i++){
+			sum += Math.abs(interpolated.get(i)-original.get(i));
 		}
 		return Math.sqrt(sum/original.size());
 	}
-	public static double MARE(List<DataPoint> original, List<DataPoint> interpolated){
+	public static double MARE(LinkedList<Double> original, LinkedList<Double> interpolated){
 		assert original.size() == interpolated.size();
 		double sum=0;
 		for (int i=0;i<original.size();i++){
-			sum += (Math.abs(interpolated.get(i).measurement-original.get(i).measurement))/original.get(i).measurement;
+			sum += (Math.abs(interpolated.get(i)-original.get(i)))/original.get(i);
 		}
 		return sum/original.size();
-	}
-	public static double MSRE(List<DataPoint> original, List<DataPoint> interpolated){
-		assert original.size() == interpolated.size();
-		double sum=0;
-		for (int i=0;i<original.size();i++){
-			sum += (Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2))/original.get(i).measurement;
-		}
-		return sum/original.size();
-	}
-	public static double RMSRE(List<DataPoint> original, List<DataPoint> interpolated){
-		assert original.size() == interpolated.size();
-		double sum=0;
-		for (int i=0;i<original.size();i++){
-			sum += (Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2))/original.get(i).measurement;
-		}
-		return Math.sqrt(sum/original.size());
 	}
 	
 	public boolean equals(Object o) {

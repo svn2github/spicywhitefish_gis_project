@@ -2,10 +2,11 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -41,6 +42,8 @@ public class Application {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		//File f = new File("data/test_data.txt");
+		//writeErrorFile(extractIntData(f));
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -51,6 +54,7 @@ public class Application {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				
 			}
 		});
 	}
@@ -195,6 +199,132 @@ public class Application {
 	private void parseFile() throws FileNotFoundException {
 		this.dataPoints = DataPoint.parseFile(this.file);
 		DataPoint.init(this.dataPoints);
+	}
+	//create file with error reports called error_statistics_idw.txt inside of data.
+	public static void writeErrorFile(LinkedList<Double>[] lists){
+		String content = "";
+		content+="MAE for IDW with 3 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[1]))+"\n";
+		content+="MAE for IDW with 3 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[2]))+"\n";
+		content+="MAE for IDW with 3 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[3]))+"\n";
+		content+="MAE for IDW with 4 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[4]))+"\n";
+		content+="MAE for IDW with 4 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[5]))+"\n";
+		content+="MAE for IDW with 4 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[6]))+"\n";
+		content+="MAE for IDW with 5 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[7]))+"\n";
+		content+="MAE for IDW with 5 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[8]))+"\n";
+		content+="MAE for IDW with 5 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MAE(lists[0],lists[9]))+"\n\n";
+		
+		content+="MSE for IDW with 3 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[1]))+"\n";
+		content+="MSE for IDW with 3 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[2]))+"\n";
+		content+="MSE for IDW with 3 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[3]))+"\n";
+		content+="MSE for IDW with 4 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[4]))+"\n";
+		content+="MSE for IDW with 4 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[5]))+"\n";
+		content+="MSE for IDW with 4 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[6]))+"\n";
+		content+="MSE for IDW with 5 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[7]))+"\n";
+		content+="MSE for IDW with 5 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[8]))+"\n";
+		content+="MSE for IDW with 5 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MSE(lists[0],lists[9]))+"\n\n";
+		
+		content+="RMSE for IDW with 3 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[1]))+"\n";
+		content+="RMSE for IDW with 3 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[2]))+"\n";
+		content+="RMSE for IDW with 3 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[3]))+"\n";
+		content+="RMSE for IDW with 4 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[4]))+"\n";
+		content+="RMSE for IDW with 4 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[5]))+"\n";
+		content+="RMSE for IDW with 4 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[6]))+"\n";
+		content+="RMSE for IDW with 5 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[7]))+"\n";
+		content+="RMSE for IDW with 5 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[8]))+"\n";
+		content+="RMSE for IDW with 5 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.RMSE(lists[0],lists[9]))+"\n\n";
+		
+		content+="MARE for IDW with 3 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[1]))+"\n";
+		content+="MARE for IDW with 3 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[2]))+"\n";
+		content+="MARE for IDW with 3 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[3]))+"\n";
+		content+="MARE for IDW with 4 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[4]))+"\n";
+		content+="MARE for IDW with 4 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[5]))+"\n";
+		content+="MARE for IDW with 4 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[6]))+"\n";
+		content+="MARE for IDW with 5 neighbors and exponent 1: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[7]))+"\n";
+		content+="MARE for IDW with 5 neighbors and exponent 2: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[8]))+"\n";
+		content+="MARE for IDW with 5 neighbors and exponent 3: ";
+		content+=Double.toString(DataPoint.MARE(lists[0],lists[9]))+"\n\n";
+		
+		try{
+			File errFile= new File("data/error_statistics_idw.txt");
+			if (!errFile.exists()) {
+				errFile.createNewFile();
+			}
+			FileWriter fw = new FileWriter(errFile.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(content);
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	public static LinkedList<Double>[] extractIntData(File file){
+		LinkedList<Double> original = new LinkedList<Double>();
+		LinkedList<Double> p3n1 = new LinkedList<Double>();
+		LinkedList<Double> p3n2 = new LinkedList<Double>();
+		LinkedList<Double> p3n3 = new LinkedList<Double>();
+		LinkedList<Double> p4n1 = new LinkedList<Double>();
+		LinkedList<Double> p4n2 = new LinkedList<Double>();
+		LinkedList<Double> p4n3 = new LinkedList<Double>();
+		LinkedList<Double> p5n1 = new LinkedList<Double>();
+		LinkedList<Double> p5n2 = new LinkedList<Double>();
+		LinkedList<Double> p5n3 = new LinkedList<Double>();
+		
+		LinkedList[] lists = {original,p3n1,p3n2,p3n3,p4n1,p4n2,p4n3,p5n1,p5n2,p5n3};
+		Scanner sc = null;
+		try {
+			sc = new Scanner(file);
+			int index = 0;
+			while (sc.hasNextDouble()){
+				lists[index].add(sc.nextDouble());
+				if (index+1%10==0){
+					index=0;
+					continue;
+				}
+				index++;
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return lists;
 	}
 	private void hasFile(boolean hasFile) {
 		mntmParseFile.setEnabled(hasFile);
