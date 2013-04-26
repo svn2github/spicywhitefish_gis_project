@@ -175,4 +175,89 @@ public class Application {
 	private void parseFile() throws FileNotFoundException {
 		this.dataPoints = DataPoint.parseFile(this.file);
 	}
+	//Compute the error measurments 
+	public boolean checkListSize(List<DataPoint> original, List<DataPoint> interpolated){
+		if (original.size()==interpolated.size()){
+			return true;
+		}
+		return false;
+	}
+	public double MAE(List<DataPoint> original, List<DataPoint> interpolated){
+		if (checkListSize(original,interpolated)){
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += Math.abs(interpolated.get(i).measurement-original.get(i).measurement);
+			}
+			return sum/original.size();
+		}
+		else{
+			System.out.println("List size did not match.");
+			return (Double) null;
+		}
+	}
+	public double MSE(List<DataPoint> original, List<DataPoint> interpolated){
+		if (checkListSize(original,interpolated)){
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2);
+			}
+			return sum/original.size();
+		}
+		else{
+			System.out.println("List size did not match.");
+			return (Double) null;
+		}
+	}
+	public double RMSE(List<DataPoint> original, List<DataPoint> interpolated){
+		if (checkListSize(original,interpolated)){
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2);
+			}
+			return Math.sqrt(sum/original.size());
+		}
+		else{
+			System.out.println("List size did not match.");
+			return (Double) null;
+		}
+	}
+	public double MARE(List<DataPoint> original, List<DataPoint> interpolated){
+		if (checkListSize(original,interpolated)){
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += (Math.abs(interpolated.get(i).measurement-original.get(i).measurement))/original.get(i).measurement;
+			}
+			return sum/original.size();
+		}
+		else{
+			System.out.println("List size did not match.");
+			return (Double) null;
+		}
+	}
+	public double MSRE(List<DataPoint> original, List<DataPoint> interpolated){
+		if (checkListSize(original,interpolated)){
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += (Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2))/original.get(i).measurement;
+			}
+			return sum/original.size();
+		}
+		else{
+			System.out.println("List size did not match.");
+			return (Double) null;
+		}
+	}
+	public double RMSRE(List<DataPoint> original, List<DataPoint> interpolated){
+		if (checkListSize(original,interpolated)){
+			double sum=0;
+			for (int i=0;i<original.size();i++){
+				sum += (Math.pow(interpolated.get(i).measurement-original.get(i).measurement,2))/original.get(i).measurement;
+			}
+			return Math.sqrt(sum/original.size());
+		}
+		else{
+			System.out.println("List size did not match.");
+			return (Double) null;
+		}
+	}
 }
