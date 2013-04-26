@@ -2,6 +2,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,12 +19,12 @@ public class DataPointTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		f = new File("/data_file.txt");
+		f = new File("../data/pm25_2009_measured.txt");
 		pointList = null;
 		try {
 			pointList = DataPoint.parseFile(f);
 		} catch (FileNotFoundException e) {
-			Assert.fail("DataPoint threw an FNF");
+			Assert.fail("DataPoint threw an File Not Found");
 		}
 
 
@@ -31,17 +32,32 @@ public class DataPointTest {
 
 	@Test
 	public final void testDataPointDoubleArray() {
-//		fail("Not yet implemented");
+		double[] testingArray = {-87.881410, 30.498000, 62, 0};
+		DataPoint testing = new DataPoint(testingArray);
+		Assert.assertEquals(testingArray[0], testing.x);
+		Assert.assertEquals(testingArray[1], testing.y);
+		Assert.assertEquals(testingArray[2], testing.time);
+		Assert.assertEquals(testingArray[3], testing.measurement);
 	}
 
 	@Test
 	public final void testDataPointDoubleDoubleIntDouble() {
-//		fail("Not yet implemented");
+		DataPoint testing = new DataPoint(-87.881410,30.498000,62,3);
+		Assert.assertEquals(-87.881410,testing.x);
+		Assert.assertEquals(30.498000,testing.y);
+		Assert.assertEquals(62,testing.time);
+		Assert.assertEquals(3,testing.measurement);
 	}
 
 	@Test
 	public final void testInterpolateValueDoubleDoubleIntListOfDataPoint() {
-//		fail("Not yet implemented");
+		//create list of points here
+		DataPoint a = new DataPoint(-87.881412,30.498001,67,0);
+		DataPoint b = new DataPoint(-87.881412,30.498001,70,0);
+		DataPoint c = new DataPoint(-87.881412,30.498001,73,0);
+		ArrayList<DataPoint> dataPoints = new ArrayList<DataPoint>();
+		dataPoints.add(a); dataPoints.add(b); dataPoints.add(c);
+		//testInterpolate now
 	}
 
 	@Test
