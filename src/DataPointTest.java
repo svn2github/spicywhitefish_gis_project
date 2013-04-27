@@ -23,8 +23,6 @@ public class DataPointTest {
 		} catch (FileNotFoundException e) {
 			Assert.fail("DataPoint threw an File Not Found");
 		}
-
-
 	}
 
 	@Test
@@ -56,16 +54,6 @@ public class DataPointTest {
 		dataPoints.add(a); dataPoints.add(b); dataPoints.add(c);
 		//testInterpolate now
 	}
-
-	@Test
-	public final void testInterpolateValueDoubleDoubleIntIntDoubleListOfDataPoint() {
-//		fail("Not yet implemented");
-	}
-
-	@Test
-	public final void testGetLambda() {
-//		fail("Not yet implemented");
-	}
 	
 
 	@Test
@@ -79,20 +67,10 @@ public class DataPointTest {
 	}
 
 	@Test
-	public final void testParseFile() {
-		//If this is executed, the beforeClass succeeded, which tests this method
-	}
-
-	@Test
 	public final void testEqualsObject() {
 		DataPoint testPoint = new DataPoint(-1.0, 2.5, 6, -5.7);
 		DataPoint otherPoint = new DataPoint(-1.0, 2.5, 6, -5.7);
 		Assert.assertEquals(testPoint, otherPoint);
-	}
-
-	@Test
-	public final void testToString() {
-		//not important
 	}
 
 }

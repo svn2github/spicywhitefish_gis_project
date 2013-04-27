@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -15,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 
 public class DataPoint {
-//	private static int count =0;
 	private static final int MAX_NEIGHBORS = 5;
 	double x;
 	double y;
@@ -68,7 +66,6 @@ public class DataPoint {
 			}
 		}
 		this.sortNeighbors();
-//		System.out.println("Initialized: "+DataPoint.count++);
 	}
 	
 	private static boolean hasNull(DataPoint[] points) {

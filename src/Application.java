@@ -50,8 +50,6 @@ public class Application {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		//File f = new File("data/test_data.txt");
-		//writeErrorFile(extractIntData(f));
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -62,7 +60,6 @@ public class Application {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				
 			}
 		});
 	}
