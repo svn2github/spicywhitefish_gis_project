@@ -213,37 +213,37 @@ public class DataPoint {
 	}
 	
 	//Compute the error doubleValue()s 
-	public static double MAE(List<Double> original, List<Double> interpolated){
-		assert original.size() == interpolated.size();
+	public static double MAE(double[] original, double[] interpolated){
+		assert original.length == interpolated.length;
 		double sum=0;
-		for (int i=0;i<original.size();i++){
-			sum += Math.abs(interpolated.get(i).doubleValue()-original.get(i).doubleValue());
+		for (int i=0;i<original.length;i++){
+			sum += Math.abs(interpolated[i]-original[i]);
 		}
-		return sum/original.size();
+		return sum/original.length;
 	}
-	public static double MSE(List<Double> original, List<Double> interpolated){
-		assert original.size() == interpolated.size();
+	public static double MSE(double[] original, double[] interpolated){
+		assert original.length == interpolated.length;
 			double sum=0;
-			for (int i=0;i<original.size();i++){
-				sum += Math.pow(interpolated.get(i).doubleValue()-original.get(i).doubleValue(),2);
+			for (int i=0;i<original.length;i++){
+				sum += Math.pow(interpolated[i]-original[i],2);
 			}
-			return sum/original.size();
+			return sum/original.length;
 	}
-	public static double RMSE(List<Double> original, List<Double> interpolated){
-		assert original.size() == interpolated.size();
+	public static double RMSE(double[] original, double[] interpolated){
+		assert original.length == interpolated.length;
 		double sum=0;
-		for (int i=0;i<original.size();i++){
-			sum += Math.pow(interpolated.get(i).doubleValue()-original.get(i).doubleValue(),2);
+		for (int i=0;i<original.length;i++){
+			sum += Math.pow(interpolated[i]-original[i],2);
 		}
-		return Math.sqrt(sum/original.size());
+		return Math.sqrt(sum/original.length);
 	}
-	public static double MARE(List<Double> original, List<Double> interpolated){
-		assert original.size() == interpolated.size();
+	public static double MARE(double[] original, double[] interpolated){
+		assert original.length == interpolated.length;
 		double sum=0;
-		for (int i=0;i<original.size();i++){
-			sum += (Math.abs(interpolated.get(i).doubleValue()-original.get(i).doubleValue()))/original.get(i).doubleValue();
+		for (int i=0;i<original.length;i++){
+			sum += (Math.abs(interpolated[i]-original[i]))/original[i];
 		}
-		return sum/original.size();
+		return sum/original.length;
 	}
 	public boolean equals(Object o) {
 		if (o instanceof DataPoint) {
@@ -264,34 +264,5 @@ public class DataPoint {
 		sb.append(" ");
 		sb.append(measurement);
 		return sb.toString();
-	}
-}
-
-class InitNeighborRunnable implements Runnable {
-	private DataPoint dataPoint;
-	private List<DataPoint> pointList;
-	public InitNeighborRunnable(DataPoint dataPoint, List<DataPoint> pointList) {
-		this.dataPoint = dataPoint;
-		this.pointList = pointList;
-	}
-	@Override
-	public void run() {
-		dataPoint.init(pointList);
-	}
-}
-
-class LoocvCallable implements Callable<Double> {
-	public DataPoint target;
-	private int N;
-	private double p;
-	public LoocvCallable(DataPoint target, int N, double p) {
-		this.target = target;
-		this.N = N;
-		this.p = p;
-	}
-
-	@Override
-	public Double call() throws Exception {
-		return new Double(target.loocv(N, p));
 	}
 }

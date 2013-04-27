@@ -1,0 +1,40 @@
+MAE for IDW with 3 neighbors and exponent 1: 3.592556536176416
+MAE for IDW with 3 neighbors and exponent 2: 3.3503174114149736
+MAE for IDW with 3 neighbors and exponent 3: 3.355350514105458
+MAE for IDW with 4 neighbors and exponent 1: 3.158271433597971
+MAE for IDW with 4 neighbors and exponent 2: 3.2097066639509477
+MAE for IDW with 4 neighbors and exponent 3: 3.2970294125217814
+MAE for IDW with 5 neighbors and exponent 1: 3.203946329615299
+MAE for IDW with 5 neighbors and exponent 2: 3.257245321801191
+MAE for IDW with 5 neighbors and exponent 3: 3.3270513856150323
+
+MSE for IDW with 3 neighbors and exponent 1: 81.4261983541853
+MSE for IDW with 3 neighbors and exponent 2: 85.57648622327763
+MSE for IDW with 3 neighbors and exponent 3: 92.15435438565044
+MSE for IDW with 4 neighbors and exponent 1: 75.82858993210034
+MSE for IDW with 4 neighbors and exponent 2: 83.4817139716347
+MSE for IDW with 4 neighbors and exponent 3: 91.17476551275507
+MSE for IDW with 5 neighbors and exponent 1: 75.36132791478651
+MSE for IDW with 5 neighbors and exponent 2: 83.52798240273245
+MSE for IDW with 5 neighbors and exponent 3: 91.24374169095576
+
+RMSE for IDW with 3 neighbors and exponent 1: 9.023646621748068
+RMSE for IDW with 3 neighbors and exponent 2: 9.250755981176761
+RMSE for IDW with 3 neighbors and exponent 3: 9.599705953082648
+RMSE for IDW with 4 neighbors and exponent 1: 8.707961295969358
+RMSE for IDW with 4 neighbors and exponent 2: 9.136832819507791
+RMSE for IDW with 4 neighbors and exponent 3: 9.548547822195534
+RMSE for IDW with 5 neighbors and exponent 1: 8.681090249201796
+RMSE for IDW with 5 neighbors and exponent 2: 9.139364441947397
+RMSE for IDW with 5 neighbors and exponent 3: 9.55215900678772
+
+MARE for IDW with 3 neighbors and exponent 1: 2.1691295386011618
+MARE for IDW with 3 neighbors and exponent 2: 2.8571626848875042
+MARE for IDW with 3 neighbors and exponent 3: 3.205822569446474
+MARE for IDW with 4 neighbors and exponent 1: 2.1870700821651075
+MARE for IDW with 4 neighbors and exponent 2: 2.877264244398198
+MARE for IDW with 4 neighbors and exponent 3: 3.218628598603186
+MARE for IDW with 5 neighbors and exponent 1: 2.3249167226274374
+MARE for IDW with 5 neighbors and exponent 2: 2.935337523767284
+MARE for IDW with 5 neighbors and exponent 3: 3.2421715080285844
+

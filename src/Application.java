@@ -2,11 +2,20 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -212,7 +221,7 @@ public class Application {
 					if (returnVal == JFileChooser.APPROVE_OPTION) {
 						output = chooser.getSelectedFile();
 					}
-					Application.writeErrorFile((Application.parseLoocvFile(input)), output);
+					Application.writeErrorFile(Application.getErrorResults(Application.parseLoocvFile(input)), output);
 					JOptionPane.showMessageDialog(Application.app.frmDirectedStudyFinal, "Successfully generated error measures file");
 				}
 			}
@@ -225,16 +234,82 @@ public class Application {
 	private void parseFile() throws FileNotFoundException {
 		this.dataPoints = DataPoint.parseFile(this.file);
 	}
-	//create file with error reports called error_statistics_idw.txt inside of data.
-	public static void writeErrorFile(LinkedList<Double>[] lists, File output) {
+	
+	public static double[][] parseLoocvFile(File file){
+		List<Double>[] lists = new LinkedList[10];
+		for (int i=0; i<10; i++) {
+			lists[i] = new LinkedList<Double>();
+		}
+		Scanner sc = null;
+		try {
+			sc = new Scanner(file);
+			int index = 0;
+			while (sc.hasNextDouble()) {
+				lists[index%10].add(new Double(sc.nextDouble()));
+				index++;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			sc.close();
+		}
+		double[][] results = new double[10][];
+		for(int method=0; method<results.length; method++) {
+			results[method] = new double[lists[method].size()];
+			int value=0;
+			for(Double d : lists[method]) {
+				results[method][value] = d.doubleValue();
+				value++;
+			}
+		}
+		return results;
+	}
+	
+	private static double[][] getErrorResults(double[][] lists) {
+		ExecutorService executor = Executors.newCachedThreadPool();
+		List<List<Future<Double>>> futures = new ArrayList<List<Future<Double>>>();
+		for(int i=1; i<lists.length; i++) {
+			Callable<Double> mae = new MAECallable(lists[0], lists[i]);
+			Callable<Double> mse = new MSECallable(lists[0], lists[i]);
+			Callable<Double> rmse = new RMSECallable(lists[0], lists[i]);
+			Callable<Double> mare = new MARECallable(lists[0], lists[i]);
+			ArrayList<Future<Double>> column = new ArrayList<Future<Double>>();
+			column.add(executor.submit(mae));
+			column.add(executor.submit(mse));
+			column.add(executor.submit(rmse));
+			column.add(executor.submit(mare));
+			futures.add(column);
+		}
+		executor.shutdown();
+		double[][] output = new double[9][];
+		for(int i=0; i<output.length; i++) {
+			output[i] = new double[4];
+		}
+		int idwIndex=0, methodIndex=0;
+		for(List<Future<Double>> idwMethod : futures) {
+			for(Future<Double> errorValueFuture : idwMethod) {
+				try {
+					output[idwIndex][methodIndex] = errorValueFuture.get().doubleValue();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				methodIndex++;
+			}
+			methodIndex=0;
+			idwIndex++;
+		}
+		return output;
+	}
+	
+	public static void writeErrorFile(double[][] results, File output) {
 		BufferedWriter bw = null;
 		try{
 			FileWriter fw = new FileWriter(output.getAbsoluteFile());
 			bw = new BufferedWriter(fw);
-			for(int errorMetric=0; errorMetric<4; errorMetric++) {
+			for(int errorMethodIndex=0; errorMethodIndex<4; errorMethodIndex++) {
 				StringBuilder sb = new StringBuilder();
-				for(int idwMethod=1; idwMethod<10; idwMethod++) {
-					switch(errorMetric) {
+				for(int idwMethodIndex=0; idwMethodIndex<9; idwMethodIndex++) {
+					switch(errorMethodIndex) {
 					case 0:
 						sb.append("MAE");
 						break;
@@ -250,45 +325,20 @@ public class Application {
 						break;
 					}
 					sb.append(" for IDW with ");
-					sb.append(errorMetric/3+3);
+					sb.append(idwMethodIndex/3+3);
 					sb.append(" neighbors and exponent ");
-					sb.append(errorMetric%3+1);
+					sb.append(idwMethodIndex%3+1);
 					sb.append(": ");
-					sb.append(DataPoint.MARE(lists[0],lists[errorMetric]));
+					sb.append(results[idwMethodIndex][errorMethodIndex]);
 					sb.append("\n");
 				}
 				sb.append("\n");
 				bw.append(sb.toString());
-				System.out.println(sb.toString());
 			}
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static LinkedList<Double>[] parseLoocvFile(File file){
-		System.out.println("Reading file!");
-		LinkedList[] lists = new LinkedList[10];
-		for (int i=0; i<10; i++) {
-			lists[i] = new LinkedList<Double>();
-		}
-		Scanner sc = null;
-		try {
-			sc = new Scanner(file);
-			int index = 0;
-			while (sc.hasNextDouble()){
-				lists[index%10].add(sc.nextDouble());
-				index++;
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			sc.close();
-		}
-		System.out.println("Read whole file!");
-		return lists;
 	}
 	private void hasFile(boolean hasFile) {
 		mntmParseFile.setEnabled(hasFile);
